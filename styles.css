@@ -9,6 +9,19 @@ body{background:#f6f8fb}
 .mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#f3f6fb;font-size:12px;color:#5a6a85}.toolbar-wrap{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.toolbar-wrap>*{min-width:160px}.toolbar-wrap .grow{flex:1 1 260px}.toast-container{z-index:1080}.modal .form-text{font-size:12px}
 .site-footer{margin-top:22px;padding:22px 20px;border-top:1px solid #e8edf5;background:#fff;color:#7c8aa0;font-size:13px}.site-footer .footer-inner{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.site-footer a{color:var(--rl-brand);text-decoration:none;font-weight:600}
 
+@media(min-width:1200px){
+  .body-wrapper{padding-top:0!important}
+  .body-wrapper .app-header{position:sticky!important;top:0!important;left:auto!important;right:auto!important;width:100%!important;height:68px!important;z-index:50!important;background:#fff!important;box-shadow:0 1px 0 rgba(24,39,75,.08)!important}
+  .app-header .navbar{min-height:68px!important;height:68px!important;padding:0 24px!important}
+  .app-header .navbar-collapse{padding-right:8px!important}
+  .app-header .navbar-nav{align-items:center!important}
+  .app-header .dropdown .nav-link{padding-right:0!important;margin-left:8px!important}
+  .body-wrapper>.container-fluid{padding-top:26px!important}
+  .page-heading{margin-bottom:22px!important}
+  .page-heading h5{font-size:24px!important;line-height:1.2!important;margin-bottom:5px!important}
+  .page-heading p{font-size:14px!important;line-height:1.45!important;margin-bottom:0!important}
+}
+
 @media(max-width:1199.98px){
   .app-topstrip{display:none!important}
   .left-sidebar{top:0!important}

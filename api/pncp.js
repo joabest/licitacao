@@ -47,30 +47,25 @@ function score(compra, prefs) {
   const negatives = prefs.negativas.map(clean).filter(Boolean);
   let compat = 20;
   const reasons = [];
-
   let hits = 0;
   for (const term of positives) {
     if (term && text.includes(term)) { hits++; reasons.push(`Termo compatível: ${term}`); }
   }
   compat += Math.min(55, hits * 11);
-
   const negHits = negatives.filter(term => term && text.includes(term));
   if (negHits.length) {
     compat -= Math.min(45, negHits.length * 18);
     reasons.push(`Termo negativo: ${negHits.join(', ')}`);
   }
-
   if (prefs.uf && compra.uf && clean(prefs.uf) === clean(compra.uf)) {
     compat += 10;
     reasons.push(`UF preferida: ${compra.uf}`);
   }
-
   if (prefs.min > 0 || prefs.max > 0) {
     const inside = compra.valorEstimado >= prefs.min && (!prefs.max || compra.valorEstimado <= prefs.max);
     if (inside) { compat += 10; reasons.push('Valor dentro da faixa desejada'); }
     else compat -= 8;
   }
-
   const now = Date.now();
   const end = compra.dataEncerramentoProposta ? Date.parse(compra.dataEncerramentoProposta) : NaN;
   const days = Number.isFinite(end) ? Math.ceil((end - now) / 86400000) : null;
@@ -100,19 +95,14 @@ async function fetchPncp(modalidade, params) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
-    const r = await fetch(`${BASE_URL}/v1/contratacoes/proposta?${qs}`, {
-      headers: { accept: 'application/json' },
-      signal: controller.signal,
-    });
+    const r = await fetch(`${BASE_URL}/v1/contratacoes/proposta?${qs}`, { headers: { accept: 'application/json' }, signal: controller.signal });
     if (r.status === 204) return { data: [], totalRegistros: 0, totalPaginas: 0 };
     if (!r.ok) throw new Error(`PNCP ${r.status}`);
     return await r.json();
-  } finally {
-    clearTimeout(timer);
-  }
+  } finally { clearTimeout(timer); }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -152,27 +142,16 @@ export default async function handler(req, res) {
         if (n.id) map.set(n.id, n);
       }
     }
-
     const now = Date.now();
     let data = [...map.values()].filter(x => !x.dataEncerramentoProposta || Date.parse(x.dataEncerramentoProposta) >= now - 60000);
     data = data.map(x => ({ ...x, score: score(x, prefs) }));
-
     if (prefs.q.length || prefs.areas.length || prefs.positivas.length) {
       data.sort((a, b) => b.score.compatibilidade - a.score.compatibilidade || b.score.urgencia - a.score.urgencia);
     } else {
-      data.sort((a, b) => (Date.parse(a.dataEncerramentoProposta || '2999-01-01') - Date.parse(b.dataEncerramentoProposta || '2999-01-01')));
+      data.sort((a, b) => Date.parse(a.dataEncerramentoProposta || '2999-01-01') - Date.parse(b.dataEncerramentoProposta || '2999-01-01'));
     }
-
-    return res.status(200).json({
-      source: 'PNCP',
-      endpoint: '/v1/contratacoes/proposta',
-      queriedAt: new Date().toISOString(),
-      filtros: { ...params, modalidades },
-      total: data.length,
-      fontes,
-      data,
-    });
+    return res.status(200).json({ source: 'PNCP', endpoint: '/v1/contratacoes/proposta', queriedAt: new Date().toISOString(), filtros: { ...params, modalidades }, total: data.length, fontes, data });
   } catch (e) {
     return res.status(502).json({ error: 'Falha ao consultar o PNCP', detail: String(e?.message || e) });
   }
-}
+};
